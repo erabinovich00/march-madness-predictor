@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>March Madness 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div>
+                <h1>MARCH MADNESS 2026</h1>
+                <p class="subtitle">Build your bracket. Beat your friends. Trust the algorithm.</p>
+            </div>
+            <div class="header-right">
+                <div id="auth-status"></div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Navigation Tabs -->
+        <nav class="tabs">
+            <button class="tab active" data-tab="my-bracket">My Bracket</button>
+            <button class="tab" data-tab="live-results">Live Results</button>
+            <button class="tab" data-tab="insights">Insights</button>
+            <button class="tab" data-tab="groups">Groups</button>
+            <button class="tab" data-tab="tools">Tools</button>
+        </nav>
+
+        <!-- Lock Banner -->
+        <div id="lock-banner" class="lock-banner hidden">
+            <span>&#128274;</span>
+            <span id="lock-message">Brackets are locked! The tournament has started.</span>
+        </div>
+
+        <!-- Tab: My Bracket -->
+        <section id="tab-my-bracket" class="tab-content">
+            <div id="bracket-auth-prompt" class="card hidden">
+                <h2>Fill Out Your Bracket</h2>
+                <p>Sign in to create and save your bracket, then compete with friends!</p>
+                <a href="/login" class="btn-primary">Sign In</a>
+                <a href="/register" class="btn-secondary">Create Account</a>
+            </div>
+
+            <div id="bracket-builder" class="hidden">
+                <!-- Saved Brackets -->
+                <div class="card" id="saved-brackets-section">
+                    <div class="card-header">
+                        <h2>My Brackets</h2>
+                        <button id="new-bracket-btn" class="btn-primary btn-sm">+ New Bracket</button>
+                    </div>
+                    <div id="saved-brackets-list"></div>
+                </div>
+
+                <!-- Bracket Editor -->
+                <div id="bracket-editor" class="hidden">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 id="editor-title">New Bracket</h2>
+                            <div class="editor-actions-row">
+                                <button id="back-to-list-btn" class="btn-secondary btn-sm">&larr; Back</button>
+                                <div class="editor-actions">
+                                    <input type="text" id="bracket-name" placeholder="Bracket name" value="My Bracket" class="input-field">
+                                    <button id="autofill-btn" class="btn-secondary btn-sm">Auto-Fill (AI)</button>
+                                    <button id="save-bracket-btn" class="btn-primary btn-sm">Save Bracket</button>
+                                    <button id="cancel-edit-btn" class="btn-secondary btn-sm">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chaos-control">
+                            <label>Upset Realism:</label>
+                            <span class="slider-label">Chalk</span>
+                            <input type="range" id="chaos-slider" min="0" max="100" value="70" step="5">
+                            <span class="slider-label">Madness</span>
+                            <span id="chaos-value" class="chaos-display">70%</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive bracket picking -->
+                    <div class="regions-grid">
+                        {% for region_name in ["East", "South", "West", "Midwest"] %}
+                        <div class="region-bracket" id="pick-region-{{ region_name|lower }}">
+                            <h3>{{ region_name }} Region</h3>
+                            <div class="pick-rounds" data-region="{{ region_name }}"></div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Final Four Picks -->
+                    <div class="card final-four-picks">
+                        <h3>Final Four &amp; Championship</h3>
+                        <div class="ff-pick-grid">
+                            <div class="ff-matchup">
+                                <div class="ff-label">East vs South</div>
+                                <div class="ff-slot" data-ff="semifinal_1" data-region-a="East" data-region-b="South">
+                                    <button class="pick-btn ff-team-a" data-side="a">--</button>
+                                    <span class="vs-label">VS</span>
+                                    <button class="pick-btn ff-team-b" data-side="b">--</button>
+                                </div>
+                                <div class="ff-winner" data-ff-winner="semifinal_1">Winner: <strong>--</strong></div>
+                            </div>
+                            <div class="ff-matchup">
+                                <div class="ff-label">West vs Midwest</div>
+                                <div class="ff-slot" data-ff="semifinal_2" data-region-a="West" data-region-b="Midwest">
+                                    <button class="pick-btn ff-team-a" data-side="a">--</button>
+                                    <span class="vs-label">VS</span>
+                                    <button class="pick-btn ff-team-b" data-side="b">--</button>
+                                </div>
+                                <div class="ff-winner" data-ff-winner="semifinal_2">Winner: <strong>--</strong></div>
+                            </div>
+                            <div class="ff-matchup championship-matchup">
+                                <div class="ff-label">&#127942; Championship</div>
+                                <div class="ff-slot" data-ff="champion">
+                                    <button class="pick-btn ff-team-a" data-side="a">--</button>
+                                    <span class="vs-label">VS</span>
+                                    <button class="pick-btn ff-team-b" data-side="b">--</button>
+                                </div>
+                                <div class="ff-winner champion-winner" data-ff-winner="champion">Champion: <strong>--</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab: Live Results -->
+        <section id="tab-live-results" class="tab-content hidden">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <h2>Live Tournament Results</h2>
+                        <p class="text-light">Results auto-sync from ESPN every 2 minutes. <span id="last-sync-time"></span></p>
+                    </div>
+                    <div class="sync-actions">
+                        <button id="sync-btn" class="btn-accent btn-sm">Sync Now</button>
+                        <label class="auto-refresh-label">
+                            <input type="checkbox" id="auto-refresh-toggle" checked> Auto-refresh
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div id="live-results-grid" class="regions-grid"></div>
+            <div id="live-ff-section" class="card"></div>
+        </section>
+
+        <!-- Tab: Groups -->
+        <section id="tab-groups" class="tab-content hidden">
+            <div id="groups-auth-prompt" class="card hidden">
+                <h2>Compete With Friends</h2>
+                <p>Sign in to create or join a group and see the leaderboard.</p>
+                <a href="/login" class="btn-primary">Sign In</a>
+            </div>
+
+            <div id="groups-content" class="hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>My Groups</h2>
+                        <div class="group-actions">
+                            <button id="create-group-btn" class="btn-primary btn-sm">Create Group</button>
+                            <button id="join-group-btn" class="btn-secondary btn-sm">Join Group</button>
+                        </div>
+                    </div>
+
+                    <!-- Inline create group form -->
+                    <div id="create-group-form" class="inline-group-form hidden">
+                        <input type="text" id="create-group-name" class="input-field" placeholder="Group name" maxlength="50">
+                        <button id="create-group-submit" class="btn-primary btn-sm">Create</button>
+                        <button id="create-group-cancel" class="btn-secondary btn-sm">Cancel</button>
+                    </div>
+
+                    <!-- Inline join group form -->
+                    <div id="join-group-form" class="inline-group-form hidden">
+                        <input type="text" id="join-group-code" class="input-field" placeholder="Enter invite code">
+                        <button id="join-group-submit" class="btn-primary btn-sm">Join</button>
+                        <button id="join-group-cancel" class="btn-secondary btn-sm">Cancel</button>
+                    </div>
+
+                    <div id="groups-list"></div>
+                </div>
+
+                <!-- Group Detail / Leaderboard -->
+                <div id="group-detail" class="card hidden">
+                    <div class="card-header">
+                        <h2 id="group-detail-name"></h2>
+                        <div>
+                            <span class="invite-code-label">Invite Code:</span>
+                            <code id="group-invite-code" class="invite-code"></code>
+                            <button id="copy-invite-btn" class="btn-sm btn-secondary">Copy</button>
+                        </div>
+                    </div>
+                    <div id="bracket-select-section" class="bracket-select-section">
+                        <label>Your bracket for this group:</label>
+                        <select id="group-bracket-select"></select>
+                        <button id="set-group-bracket-btn" class="btn-sm btn-accent">Set</button>
+                    </div>
+                    <h3>Leaderboard</h3>
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Player</th>
+                                <th>Correct</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab: Insights -->
+        <section id="tab-insights" class="tab-content hidden">
+            <div id="insights-auth-prompt" class="card hidden">
+                <h2>Bracket Insights</h2>
+                <p>Sign in and save a bracket to see your risk analysis and live health tracker.</p>
+                <a href="/login" class="btn-primary">Sign In</a>
+            </div>
+
+            <div id="insights-content" class="hidden">
+                <!-- Bracket selector -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Bracket Insights</h2>
+                        <div class="insights-bracket-select">
+                            <label>Analyze:</label>
+                            <select id="insights-bracket-dropdown"></select>
+                            <button id="analyze-btn" class="btn-accent btn-sm">Analyze</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risk Score Card -->
+                <div id="risk-card" class="card hidden">
+                    <div class="risk-header">
+                        <div class="risk-gauge">
+                            <div class="risk-score-circle">
+                                <span id="risk-score-num">--</span>
+                            </div>
+                            <div class="risk-label-group">
+                                <span id="risk-emoji" class="risk-emoji"></span>
+                                <span id="risk-label" class="risk-label"></span>
+                            </div>
+                        </div>
+                        <div class="risk-summary">
+                            <p id="risk-desc" class="risk-desc"></p>
+                            <div class="risk-stats">
+                                <div class="risk-stat">
+                                    <span class="stat-value" id="risk-percentile">--</span>
+                                    <span class="stat-label">Risk Percentile</span>
+                                </div>
+                                <div class="risk-stat">
+                                    <span class="stat-value" id="risk-upsets">--</span>
+                                    <span class="stat-label">Upsets Picked</span>
+                                </div>
+                                <div class="risk-stat">
+                                    <span class="stat-value" id="risk-expected">--</span>
+                                    <span class="stat-label">Expected Pts</span>
+                                </div>
+                                <div class="risk-stat">
+                                    <span class="stat-value" id="risk-max">--</span>
+                                    <span class="stat-label">Max Possible</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Champion Analysis -->
+                <div id="champ-card" class="card hidden">
+                    <h3>Champion Pick</h3>
+                    <div id="champ-content"></div>
+                </div>
+
+                <!-- Region Risk Breakdown -->
+                <div id="region-risk-card" class="card hidden">
+                    <h3>Region Risk Breakdown</h3>
+                    <div id="region-risk-bars"></div>
+                </div>
+
+                <!-- Boldest & Safest Picks -->
+                <div class="insights-picks-grid">
+                    <div id="boldest-card" class="card hidden">
+                        <h3>&#x1F525; Boldest Picks</h3>
+                        <div id="boldest-list"></div>
+                    </div>
+                    <div id="safest-card" class="card hidden">
+                        <h3>&#x1F6E1;&#xFE0F; Safest Picks</h3>
+                        <div id="safest-list"></div>
+                    </div>
+                </div>
+
+                <!-- Live Health Tracker -->
+                <div id="health-card" class="card hidden">
+                    <div class="card-header">
+                        <h3>Live Bracket Health</h3>
+                        <button id="refresh-health-btn" class="btn-secondary btn-sm">Refresh</button>
+                    </div>
+                    <div id="health-content"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab: Tools -->
+        <section id="tab-tools" class="tab-content hidden">
+            <section class="card">
+                <h2 class="calc-title">Seed Matchup Calculator <span id="model-badge" class="model-badge-header"></span></h2>
+                <div class="matchup-inputs">
+                    <div class="seed-select">
+                        <label for="region-select">Region</label>
+                        <select id="region-select">
+                            <option value="East">East</option>
+                            <option value="South">South</option>
+                            <option value="West">West</option>
+                            <option value="Midwest">Midwest</option>
+                        </select>
+                    </div>
+                    <div class="seed-select">
+                        <label for="seed-a">Team A</label>
+                        <select id="seed-a"></select>
+                    </div>
+                    <span class="vs-label">VS</span>
+                    <div class="seed-select">
+                        <label for="seed-b">Team B</label>
+                        <select id="seed-b"></select>
+                    </div>
+                    <div class="seed-select">
+                        <label for="round-select">Round</label>
+                        <select id="round-select">
+                            <option value="1">Round of 64</option>
+                            <option value="2">Round of 32</option>
+                            <option value="3">Sweet 16</option>
+                            <option value="4">Elite 8</option>
+                            <option value="5">Final Four</option>
+                            <option value="6">Championship</option>
+                        </select>
+                    </div>
+                    <button id="calc-btn" class="btn-accent">Calculate</button>
+                </div>
+                <div id="matchup-result" class="matchup-result hidden"></div>
+            </section>
+
+            <section class="card">
+                <h2>Scoring System</h2>
+                <table class="scoring-table">
+                    <tr><th>Round</th><th>Points per correct pick</th></tr>
+                    <tr><td>Round of 64</td><td>10</td></tr>
+                    <tr><td>Round of 32</td><td>20</td></tr>
+                    <tr><td>Sweet 16</td><td>40</td></tr>
+                    <tr><td>Elite 8</td><td>80</td></tr>
+                    <tr><td>Final Four</td><td>160</td></tr>
+                    <tr><td>Championship</td><td>320</td></tr>
+                    <tr><td><strong>Perfect Bracket</strong></td><td><strong>1920</strong></td></tr>
+                </table>
+            </section>
+        </section>
+    </main>
+
+    <footer>
+        <p>Predictions based on historical NCAA tournament data (1985&ndash;2024). For entertainment purposes only.</p>
+    </footer>
+
+    <!-- Toast notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script>
+        // Pass teams data from server to JS
+        const TEAMS = {{ teams | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
