@@ -1017,7 +1017,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         e.preventDefault();
                         const bracketId = link.dataset.bracketId;
                         if (bracketId) {
-                            document.querySelector('[data-tab="bracket"]').click();
+                            document.querySelector('[data-tab="my-bracket"]').click();
                             window._viewBracket(parseInt(bracketId));
                         }
                     });
