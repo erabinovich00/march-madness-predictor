@@ -59,6 +59,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 btn.classList.add("active");
                 const tabId = btn.dataset.tab;
                 document.getElementById("tab-" + tabId).classList.remove("hidden");
+                if (tabId === "my-bracket") btn.textContent = "My Bracket";
                 if (tabId === "live-results") loadLiveResults();
                 if (tabId === "groups") loadGroups();
                 if (tabId === "insights") loadInsightsTab();
@@ -211,7 +212,15 @@ document.addEventListener("DOMContentLoaded", () => {
             editingBracketId = b.id;
             viewingOnly = true;
             picks = b.picks || {};
-            document.getElementById("editor-title").textContent = b.name;
+            const isOwnBracket = currentUser && b.username === currentUser.username;
+            const tabBtn = document.querySelector('[data-tab="my-bracket"]');
+            if (!isOwnBracket && b.username) {
+                tabBtn.textContent = b.username + "'s Bracket";
+                document.getElementById("editor-title").textContent = b.username + "'s " + b.name;
+            } else {
+                tabBtn.textContent = "My Bracket";
+                document.getElementById("editor-title").textContent = b.name;
+            }
             setEditorReadOnly(true);
             showEditor();
             buildPickUI();
@@ -228,6 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
             editingBracketId = b.id;
             viewingOnly = false;
             picks = b.picks || {};
+            document.querySelector('[data-tab="my-bracket"]').textContent = "My Bracket";
             document.getElementById("bracket-name").value = b.name;
             document.getElementById("editor-title").textContent = "Edit: " + b.name;
             setEditorReadOnly(false);
@@ -256,6 +266,7 @@ document.addEventListener("DOMContentLoaded", () => {
         editingBracketId = null;
         viewingOnly = false;
         picks = {};
+        document.querySelector('[data-tab="my-bracket"]').textContent = "My Bracket";
         document.getElementById("bracket-name").value = "My Bracket";
         document.getElementById("editor-title").textContent = "New Bracket";
         setEditorReadOnly(false);
