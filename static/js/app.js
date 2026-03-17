@@ -216,11 +216,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const tabBtn = document.querySelector('[data-tab="my-bracket"]');
             if (!isOwnBracket && b.username) {
                 tabBtn.textContent = b.username + "'s Bracket";
-                document.getElementById("editor-title").textContent = b.username + "'s Bracket";
             } else {
                 tabBtn.textContent = "My Bracket";
-                document.getElementById("editor-title").textContent = b.name;
             }
+            document.getElementById("editor-title").textContent = b.name;
             setEditorReadOnly(true);
             showEditor();
             buildPickUI();
@@ -267,7 +266,8 @@ document.addEventListener("DOMContentLoaded", () => {
         viewingOnly = false;
         picks = {};
         document.querySelector('[data-tab="my-bracket"]').textContent = "My Bracket";
-        document.getElementById("bracket-name").value = "My Bracket";
+        const defaultName = currentUser ? currentUser.username + "'s Bracket" : "My Bracket";
+        document.getElementById("bracket-name").value = defaultName;
         document.getElementById("editor-title").textContent = "New Bracket";
         setEditorReadOnly(false);
         showEditor();
@@ -665,7 +665,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("save-bracket-btn").addEventListener("click", async () => {
         if (tournamentLocked) { showToast("Brackets are locked!", "warning"); return; }
 
-        const name = document.getElementById("bracket-name").value.trim() || "My Bracket";
+        const fallbackName = currentUser ? currentUser.username + "'s Bracket" : "My Bracket";
+        const name = document.getElementById("bracket-name").value.trim() || fallbackName;
         const payload = { picks, name };
 
         try {
