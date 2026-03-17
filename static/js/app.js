@@ -1000,19 +1000,31 @@ document.addEventListener("DOMContentLoaded", () => {
             const lb = await r.json();
             const body = document.getElementById("leaderboard-body");
             if (lb.length === 0) {
-                body.innerHTML = '<tr><td colspan="4">No members yet.</td></tr>';
+                body.innerHTML = '<tr><td colspan="5">No members yet.</td></tr>';
             } else {
                 body.innerHTML = lb.map((m, i) => `
                     <tr class="${m.username === (currentUser && currentUser.username) ? 'highlight-row' : ''}">
                         <td>${i + 1}</td>
-                        <td>${esc(m.username)}</td>
+                        <td>${m.bracket_id ? `<a href="#" class="lb-view-bracket" data-bracket-id="${m.bracket_id}">${esc(m.username)}</a>` : esc(m.username)}</td>
+                        <td>${m.champion ? esc(m.champion) : '<span class="text-light">—</span>'}</td>
                         <td>${m.correct}</td>
                         <td><strong>${m.score}</strong></td>
                     </tr>
                 `).join("");
+                // Attach click handlers for viewing brackets
+                body.querySelectorAll('.lb-view-bracket').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const bracketId = link.dataset.bracketId;
+                        if (bracketId) {
+                            document.querySelector('[data-tab="bracket"]').click();
+                            window._viewBracket(parseInt(bracketId));
+                        }
+                    });
+                });
             }
         } catch (e) {
-            document.getElementById("leaderboard-body").innerHTML = '<tr><td colspan="4">Error loading leaderboard.</td></tr>';
+            document.getElementById("leaderboard-body").innerHTML = '<tr><td colspan="5">Error loading leaderboard.</td></tr>';
         }
     }
 

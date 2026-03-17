@@ -1216,6 +1216,16 @@ footer {
     background: rgba(255, 255, 255, 0.02);
 }
 
+.lb-view-bracket {
+    color: var(--accent);
+    text-decoration: none;
+    cursor: pointer;
+}
+.lb-view-bracket:hover {
+    color: var(--primary);
+    text-decoration: underline;
+}
+
 /* ===== Scoring Table ===== */
 .scoring-table {
     width: 100%;

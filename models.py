@@ -337,6 +337,7 @@ def get_group_leaderboard(group_id):
     for m in members:
         score = 0
         correct = 0
+        champion = None
         total_decided = len(actual_winners)
         if m["bracket_id"]:
             bracket = get_bracket(m["bracket_id"])
@@ -344,6 +345,7 @@ def get_group_leaderboard(group_id):
                 import json
                 picks = json.loads(bracket["picks"])
                 score, correct = calculate_score(picks, actual_winners)
+                champion = picks.get("champion")
         leaderboard.append({
             "user_id": m["user_id"],
             "username": m["username"],
@@ -351,6 +353,7 @@ def get_group_leaderboard(group_id):
             "score": score,
             "correct": correct,
             "total_decided": total_decided,
+            "champion": champion,
         })
 
     leaderboard.sort(key=lambda x: x["score"], reverse=True)
