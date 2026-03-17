@@ -8,4 +8,6 @@ cache/
 *.egg-info/
 dist/
 build/
+webapp_logs*/
+check.txt
 .venv/

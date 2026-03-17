@@ -36,12 +36,17 @@ app.secret_key = os.environ.get("SECRET_KEY", secrets.token_hex(32))
 init_db()
 init_results()
 
-# Initialize ML model (fetches ESPN data + trains)
-try:
-    _ml_model = init_model()
-except Exception as e:
-    print(f"[ML] Failed to initialize model: {e}")
-    _ml_model = get_model()  # untrained fallback
+# Initialize ML model in background (avoid blocking startup / health probes)
+_ml_model = get_model()  # untrained fallback; will be replaced once init finishes
+
+def _init_ml_background():
+    global _ml_model
+    try:
+        _ml_model = init_model()
+    except Exception as e:
+        print(f"[ML] Failed to initialize model: {e}")
+
+threading.Thread(target=_init_ml_background, daemon=True).start()
 
 
 # --- Auth helpers ---
