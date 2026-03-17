@@ -216,7 +216,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const tabBtn = document.querySelector('[data-tab="my-bracket"]');
             if (!isOwnBracket && b.username) {
                 tabBtn.textContent = b.username + "'s Bracket";
-                document.getElementById("editor-title").textContent = b.username + "'s " + b.name;
+                document.getElementById("editor-title").textContent = b.username + "'s Bracket";
             } else {
                 tabBtn.textContent = "My Bracket";
                 document.getElementById("editor-title").textContent = b.name;
@@ -1359,40 +1359,44 @@ document.addEventListener("DOMContentLoaded", () => {
             regionCard.classList.add("hidden");
         }
 
-        // Boldest picks
-        const boldestCard = document.getElementById("boldest-card");
-        if (data.boldest_picks && data.boldest_picks.length > 0) {
-            boldestCard.classList.remove("hidden");
-            document.getElementById("boldest-list").innerHTML = data.boldest_picks.map(p => {
-                const prob = Math.round(p.win_prob * 100);
-                return `
-                <div class="insight-pick-row">
-                    <span class="insight-pick-team"><span class="seed-badge">${p.winner_seed}</span> ${esc(p.winner)}</span>
-                    <span class="insight-pick-round">${esc(p.round_name)}</span>
-                    <span class="insight-pick-region">${esc(p.region)}</span>
-                    <span class="insight-pick-prob prob-danger">${prob}% chance</span>
-                </div>`;
-            }).join("");
+        // All matchups grouped by round, sorted riskiest to safest
+        const matchupsCard = document.getElementById("matchups-card");
+        if (data.all_games && data.all_games.length > 0) {
+            matchupsCard.classList.remove("hidden");
+            const roundOrder = [1, 2, 3, 4, 5, 6];
+            const roundNames = {1: "Round of 64", 2: "Round of 32", 3: "Sweet 16", 4: "Elite 8", 5: "Final Four", 6: "Championship"};
+            const grouped = {};
+            for (const g of data.all_games) {
+                if (!grouped[g.round]) grouped[g.round] = [];
+                grouped[g.round].push(g);
+            }
+            let html = "";
+            for (const rd of roundOrder) {
+                const games = grouped[rd];
+                if (!games || games.length === 0) continue;
+                games.sort((a, b) => a.win_prob - b.win_prob);
+                html += `<div class="matchup-round-group">`;
+                html += `<h4 class="matchup-round-title">${esc(roundNames[rd])}</h4>`;
+                for (const g of games) {
+                    const prob = Math.round(g.win_prob * 100);
+                    const probClass = prob < 40 ? "prob-danger" : prob < 65 ? "prob-warn" : "prob-safe";
+                    const loserName = g.loser || ("#" + g.loser_seed + " seed");
+                    html += `
+                    <div class="matchup-row">
+                        <div class="matchup-teams">
+                            <span class="matchup-winner"><span class="seed-badge">${g.winner_seed}</span> ${esc(g.winner)}</span>
+                            <span class="matchup-vs">over</span>
+                            <span class="matchup-loser"><span class="seed-badge">${g.loser_seed}</span> ${esc(loserName)}</span>
+                        </div>
+                        <span class="matchup-region">${esc(g.region)}</span>
+                        <span class="matchup-prob ${probClass}">${prob}%</span>
+                    </div>`;
+                }
+                html += `</div>`;
+            }
+            document.getElementById("matchups-content").innerHTML = html;
         } else {
-            boldestCard.classList.add("hidden");
-        }
-
-        // Safest picks
-        const safestCard = document.getElementById("safest-card");
-        if (data.safest_picks && data.safest_picks.length > 0) {
-            safestCard.classList.remove("hidden");
-            document.getElementById("safest-list").innerHTML = data.safest_picks.map(p => {
-                const prob = Math.round(p.win_prob * 100);
-                return `
-                <div class="insight-pick-row">
-                    <span class="insight-pick-team"><span class="seed-badge">${p.winner_seed}</span> ${esc(p.winner)}</span>
-                    <span class="insight-pick-round">${esc(p.round_name)}</span>
-                    <span class="insight-pick-region">${esc(p.region)}</span>
-                    <span class="insight-pick-prob prob-safe">${prob}% chance</span>
-                </div>`;
-            }).join("");
-        } else {
-            safestCard.classList.add("hidden");
+            matchupsCard.classList.add("hidden");
         }
     }
 

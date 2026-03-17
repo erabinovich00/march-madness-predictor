@@ -1585,52 +1585,91 @@ footer {
     text-align: right;
 }
 
-/* Boldest & Safest Picks Grid */
-.insights-picks-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-top: 0;
+/* All Matchups by Round */
+.matchup-round-group {
+    margin-bottom: 1.5rem;
 }
 
-.insight-pick-row {
+.matchup-round-group:last-child {
+    margin-bottom: 0;
+}
+
+.matchup-round-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.5rem 0;
+    padding-bottom: 0.3rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.matchup-row {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.45rem 0;
+    gap: 0.75rem;
+    padding: 0.5rem 0.5rem;
     border-bottom: 1px solid var(--border);
     font-size: 0.85rem;
-    flex-wrap: wrap;
 }
 
-.insight-pick-row:last-child { border-bottom: none; }
+.matchup-row:last-child { border-bottom: none; }
 
-.insight-pick-team {
-    font-weight: 600;
+.matchup-row:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.matchup-teams {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
     flex: 1;
-    min-width: 100px;
+    min-width: 0;
+}
+
+.matchup-winner {
+    font-weight: 600;
     display: flex;
     align-items: center;
     gap: 0.3rem;
+    white-space: nowrap;
 }
 
-.insight-pick-round {
-    color: var(--text-light);
-    font-size: 0.78rem;
-}
-
-.insight-pick-region {
+.matchup-vs {
     color: var(--text-muted);
     font-size: 0.75rem;
+    font-style: italic;
 }
 
-.insight-pick-prob {
+.matchup-loser {
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    white-space: nowrap;
+}
+
+.matchup-loser .seed-badge {
+    opacity: 0.6;
+}
+
+.matchup-region {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    min-width: 60px;
+    text-align: center;
+}
+
+.matchup-prob {
     font-weight: 700;
-    font-size: 0.8rem;
-    margin-left: auto;
+    font-size: 0.85rem;
+    min-width: 40px;
+    text-align: right;
 }
 
 .prob-danger { color: var(--lose); }
+.prob-warn { color: var(--primary); }
 .prob-safe { color: var(--win); }
 
 /* Health Tracker */
@@ -2117,8 +2156,13 @@ footer {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .insights-picks-grid {
-        grid-template-columns: 1fr;
+    .matchup-row {
+        flex-wrap: wrap;
+        gap: 0.3rem;
+    }
+
+    .matchup-teams {
+        width: 100%;
     }
 
     .champ-analysis {

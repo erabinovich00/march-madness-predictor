@@ -70,6 +70,7 @@ def _build_game_tree(picks, region):
             loser_seed = seed_b
         else:
             loser_seed = seed_a
+        loser_name = teams.get(loser_seed, f"#{loser_seed} seed")
         prob = _matchup_probability(winner_seed, loser_seed, 1)
         games.append({
             "round": 1,
@@ -78,6 +79,7 @@ def _build_game_tree(picks, region):
             "region": region,
             "winner": winner_name,
             "winner_seed": winner_seed,
+            "loser": loser_name,
             "loser_seed": loser_seed,
             "win_prob": prob,
         })
@@ -203,6 +205,7 @@ def analyze_bracket(picks):
         east_seed = _seed_for_team("East", region_winners["East"])
         south_seed = _seed_for_team("South", region_winners["South"])
         if east_seed and south_seed:
+            sf1_loser = region_winners["South"] if sf1_winner == region_winners["East"] else region_winners["East"]
             prob = _matchup_probability(
                 _seed_for_team("East", sf1_winner) or east_seed,
                 south_seed if sf1_winner == region_winners["East"] else east_seed,
@@ -213,6 +216,7 @@ def analyze_bracket(picks):
                 "region": "Final Four",
                 "winner": sf1_winner,
                 "winner_seed": _seed_for_team("East", sf1_winner) or _seed_for_team("South", sf1_winner),
+                "loser": sf1_loser,
                 "loser_seed": south_seed if sf1_winner == region_winners["East"] else east_seed,
                 "win_prob": prob,
             }
@@ -228,6 +232,7 @@ def analyze_bracket(picks):
         west_seed = _seed_for_team("West", region_winners["West"])
         midwest_seed = _seed_for_team("Midwest", region_winners["Midwest"])
         if west_seed and midwest_seed:
+            sf2_loser = region_winners["Midwest"] if sf2_winner == region_winners["West"] else region_winners["West"]
             prob = _matchup_probability(
                 _seed_for_team("West", sf2_winner) or west_seed,
                 midwest_seed if sf2_winner == region_winners["West"] else west_seed,
@@ -238,6 +243,7 @@ def analyze_bracket(picks):
                 "region": "Final Four",
                 "winner": sf2_winner,
                 "winner_seed": _seed_for_team("West", sf2_winner) or _seed_for_team("Midwest", sf2_winner),
+                "loser": sf2_loser,
                 "loser_seed": midwest_seed if sf2_winner == region_winners["West"] else west_seed,
                 "win_prob": prob,
             }
@@ -271,6 +277,7 @@ def analyze_bracket(picks):
                 "region": "Final Four",
                 "winner": champion,
                 "winner_seed": champ_seed,
+                "loser": opp,
                 "loser_seed": opponent_seed,
                 "win_prob": prob,
             }
@@ -362,6 +369,7 @@ def analyze_bracket(picks):
         "max_possible": max_possible,
         "boldest_picks": boldest,
         "safest_picks": safest,
+        "all_games": all_games,
         "region_risk": region_risk,
         "champion": champ_analysis,
     }
