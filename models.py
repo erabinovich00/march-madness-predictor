@@ -345,7 +345,8 @@ def get_group_leaderboard(group_id):
                 import json
                 picks = json.loads(bracket["picks"])
                 score, correct = calculate_score(picks, actual_winners)
-                champion = picks.get("champion")
+                ff = picks.get("final_four") or {}
+                champion = ff.get("champion") if isinstance(ff, dict) else None
         leaderboard.append({
             "user_id": m["user_id"],
             "username": m["username"],
