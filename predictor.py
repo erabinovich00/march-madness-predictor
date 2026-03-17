@@ -45,6 +45,10 @@ def get_win_probability(seed_a, seed_b, round_number=1):
         # seed_a is underdog - pull probability slightly toward 0.5
         adjusted = base_prob + (0.5 - base_prob) * (upset_factor - 1.0)
 
+    # base_prob and adjusted are P(higher seed wins); convert to P(seed_a wins)
+    if seed_a > seed_b:
+        adjusted = 1.0 - adjusted
+
     return max(0.01, min(0.99, adjusted))
 
 
