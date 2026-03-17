@@ -66,6 +66,8 @@ def _build_game_tree(picks, region):
             continue
         winner_name = r1[game_idx]
         winner_seed = _seed_for_team(region, winner_name)
+        if winner_seed is None:
+            continue
         if winner_seed == seed_a:
             loser_seed = seed_b
         else:
