@@ -1124,46 +1124,52 @@ document.addEventListener("DOMContentLoaded", () => {
     // Matchup Calculator (Tools tab)
     // ============================
     function initSeedDropdowns() {
-        const seedA = document.getElementById("seed-a");
-        const seedB = document.getElementById("seed-b");
-        const regionSel = document.getElementById("region-select");
-        if (!seedA || !seedB) return;
+        const teamA = document.getElementById("team-a");
+        const teamB = document.getElementById("team-b");
+        if (!teamA || !teamB) return;
 
-        function populateSeeds() {
-            const region = regionSel ? regionSel.value : "East";
-            const teams = TEAMS[region] || {};
-            const prevA = seedA.value;
-            const prevB = seedB.value;
-            seedA.innerHTML = "";
-            seedB.innerHTML = "";
-            for (let i = 1; i <= 16; i++) {
-                const name = teams[String(i)] || teams[i] || `Seed ${i}`;
-                seedA.appendChild(new Option(`#${i} ${name}`, i));
-                seedB.appendChild(new Option(`#${i} ${name}`, i));
+        function populateTeams() {
+            teamA.innerHTML = "";
+            teamB.innerHTML = "";
+            for (const region of ["East", "South", "West", "Midwest"]) {
+                const teams = TEAMS[region] || {};
+                const groupA = document.createElement("optgroup");
+                groupA.label = region;
+                const groupB = document.createElement("optgroup");
+                groupB.label = region;
+                for (let i = 1; i <= 16; i++) {
+                    const name = teams[String(i)] || teams[i] || `Seed ${i}`;
+                    const val = `${region}:${i}`;
+                    groupA.appendChild(new Option(`#${i} ${name}`, val));
+                    groupB.appendChild(new Option(`#${i} ${name}`, val));
+                }
+                teamA.appendChild(groupA);
+                teamB.appendChild(groupB);
             }
-            seedA.value = prevA || "1";
-            seedB.value = prevB || "16";
+            teamA.value = "East:1";
+            teamB.value = "South:1";
         }
 
-        populateSeeds();
-        if (regionSel) regionSel.addEventListener("change", populateSeeds);
+        populateTeams();
     }
 
     function initMatchupCalc() {
         const calcBtn = document.getElementById("calc-btn");
         if (!calcBtn) return;
         calcBtn.addEventListener("click", async () => {
-            const seedA = document.getElementById("seed-a").value;
-            const seedB = document.getElementById("seed-b").value;
+            const teamAVal = document.getElementById("team-a").value;
+            const teamBVal = document.getElementById("team-b").value;
+            const [regionA, seedA] = teamAVal.split(":");
+            const [regionB, seedB] = teamBVal.split(":");
             const round = document.getElementById("round-select").value;
-            const region = (document.getElementById("region-select") || {}).value || "East";
-            const params = new URLSearchParams({ seed_a: seedA, seed_b: seedB, round, region });
+            const params = new URLSearchParams({ seed_a: seedA, seed_b: seedB, round, region_a: regionA, region_b: regionB });
             const r = await fetch(`/api/matchup?${params}`);
             const data = await r.json();
             const result = document.getElementById("matchup-result");
-            const teams = TEAMS[region] || {};
-            const nameA = data.team_a || teams[String(seedA)] || teams[seedA] || `#${seedA} Seed`;
-            const nameB = data.team_b || teams[String(seedB)] || teams[seedB] || `#${seedB} Seed`;
+            const teamsA = TEAMS[regionA] || {};
+            const teamsB = TEAMS[regionB] || {};
+            const nameA = data.team_a || teamsA[String(seedA)] || teamsA[seedA] || `#${seedA} Seed`;
+            const nameB = data.team_b || teamsB[String(seedB)] || teamsB[seedB] || `#${seedB} Seed`;
             const modelLabel = data.model === "ml" ? "ML Model" : "Seed-Based";
             result.classList.remove("hidden");
 

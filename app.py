@@ -336,16 +336,17 @@ def matchup():
         seed_a = int(request.args.get("seed_a", 1))
         seed_b = int(request.args.get("seed_b", 16))
         round_num = int(request.args.get("round", 1))
-        region = request.args.get("region", "East")
+        region_a = request.args.get("region_a", request.args.get("region", "East"))
+        region_b = request.args.get("region_b", region_a)
     except (ValueError, TypeError):
         return jsonify({"error": "Invalid seed or round values"}), 400
     if not (1 <= seed_a <= 16 and 1 <= seed_b <= 16):
         return jsonify({"error": "Seeds must be between 1 and 16"}), 400
 
-    # Use ML model if ready; resolve team names from region
-    if _ml_model.ready and region in SAMPLE_TEAMS:
-        team_a_name = SAMPLE_TEAMS[region].get(seed_a, f"#{seed_a} Seed")
-        team_b_name = SAMPLE_TEAMS[region].get(seed_b, f"#{seed_b} Seed")
+    # Use ML model if ready; resolve team names from their respective regions
+    if _ml_model.ready:
+        team_a_name = SAMPLE_TEAMS.get(region_a, {}).get(seed_a, f"#{seed_a} Seed")
+        team_b_name = SAMPLE_TEAMS.get(region_b, {}).get(seed_b, f"#{seed_b} Seed")
         return jsonify(get_ml_matchup_probability(
             _ml_model, team_a_name, team_b_name,
             seed_a, seed_b, round_num,
